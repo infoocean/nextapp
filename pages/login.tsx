@@ -9,9 +9,6 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { IconButton } from "@mui/material";
 import { BiArrowBack } from "react-icons/bi";
-import { SlSocialFacebook } from "react-icons/sl";
-import { RiTwitterLine } from "react-icons/ri";
-import { RxInstagramLogo } from "react-icons/rx";
 import Link from "next/link";
 import { useForm, SubmitHandler } from "react-hook-form";
 
@@ -28,34 +25,9 @@ type FormValues = {
 
 export default function Login() {
 
-  // const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-  //   event.preventDefault();
-  //   const data = new FormData(event.currentTarget);
-  //   console.log({
-  //     email: data.get("email"),
-  //     password: data.get("password"),
-  //   });
-  // };
-
   const {register, handleSubmit, formState: { errors } } = useForm<FormValues>();
   const onSubmit: SubmitHandler<FormValues> = data => {
     console.log(data);
-    const url = "https://api-school-mangoitsol.com/api/userlogin";
-
-    fetch(url, {
-      method: 'POST', // or 'PUT'
-      headers: {
-        Authorization:"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNqMjU4NTA5N0BnbWFpbC5jb20iLCJwYXNzd29yZCI6IlNodWJoYW0jMTIiLCJpYXQiOjE2Njk2MDk1MTR9.I06yy-Y3vlE784xUUg7__YH9Y1w_svjkGPKQC6SKSD4",
-      },
-      body: JSON.stringify(data),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log('Success:', data);
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-      });
   }
   return (
     <>
@@ -128,10 +100,16 @@ export default function Login() {
                   placeholder="Email Address..."
                   {...register("email", {
                     required: true,
+                    pattern:  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
                   })}
                 />
                  <span style={style}>
-                  {errors.email && <span>Email Feild is Required **</span>}
+                  {errors?.email?.type === "required" && (
+                    <div>Email Feild is Required **.</div>
+                  )}
+                  {errors?.email?.type === "pattern" && (
+                    <div>Invalid Email **.</div>
+                  )}
                 </span>
                 <Typography style={{ marginTop: "15px" }}>Password</Typography>
                 <TextField

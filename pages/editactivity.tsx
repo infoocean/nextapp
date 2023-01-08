@@ -27,7 +27,7 @@ import {
 
 type FormValues = {
     name: string;
-    price: string;
+    price: number;
     startdate:string;
     enddate:string;
     shortdescription:string;
@@ -36,8 +36,13 @@ type FormValues = {
     status:TypeEnum;
   };
 
-  export default function Addactivity(){
-    const {register, handleSubmit, formState: { errors } } = useForm<FormValues>();
+  export default function Editactivity(){
+    const {register, handleSubmit, formState: { errors } } = useForm<FormValues>({ defaultValues: {
+      name: "bill",
+      price:23,
+      startdate:"2022-12-10",
+      status:"Free"
+    }});
     const onSubmit: SubmitHandler<FormValues> = data => {
       console.log(data);
     }
@@ -60,6 +65,7 @@ type FormValues = {
                     {...register("name", {
                         required: true,
                       })}
+                     
                   />
                 </Stack>
                 <span style={style}>
@@ -96,7 +102,7 @@ type FormValues = {
                       size="small"
                       placeholder="Enter Car Brand"
                       
-                    > 
+                    >
                       <MenuItem value="Free">Free</MenuItem>
                       <MenuItem value="Paid">Paid</MenuItem>
                     </Select>
