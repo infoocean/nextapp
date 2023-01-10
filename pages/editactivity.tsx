@@ -2,6 +2,7 @@ import {
     Button,
     Container,
     FormControl,
+    getCardHeaderUtilityClass,
     Grid,
     InputLabel,
     MenuItem,
@@ -10,7 +11,7 @@ import {
     Stack,
     TextareaAutosize,
   } from "@mui/material";  
-  import React from "react";
+  import React, { useEffect, useState } from "react";
   import { useForm, SubmitHandler } from "react-hook-form";
 
   const style = {
@@ -37,11 +38,36 @@ type FormValues = {
   };
 
   export default function Editactivity(){
+
+    const [activites, setactivites] = useState<any>([]);
+    const url = `https://api-school.mangoitsol.com/api/getactivitydetails/19`;
+    const fetchData = async () => {
+      try {
+        const response = await fetch(url, {
+          headers: {
+            Authorization:
+              "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNqMjU4NTA5N0BnbWFpbC5jb20iLCJwYXNzd29yZCI6IlNodWJoYW0jMTIiLCJpYXQiOjE2Njk2MDk1MTR9.I06yy-Y3vlE784xUUg7__YH9Y1w_svjkGPKQC6SKSD4",
+          },
+        });
+        const json = await response.json();
+        //console.log(json.data);
+        setactivites(json.data);
+      } catch (error) {
+        console.log("error", error);
+      }
+    }
+    useEffect(() => {
+      fetchData();
+    }, [])
+    
+    console.log(activites);
     const {register, handleSubmit, formState: { errors } } = useForm<FormValues>({ defaultValues: {
-      name: "bill",
+      name: activites.name,
       price:23,
       startdate:"2022-12-10",
-      status:"Free"
+      enddate:"2022-12-20",
+      shortdescription:"kjdfhdkjzfhakshfk",
+      description:"djkfksgvksdhfkshdkjfhskjfhsdjfhdsufghsduigfsyefidsyiofsydfhdsi",
     }});
     const onSubmit: SubmitHandler<FormValues> = data => {
       console.log(data);

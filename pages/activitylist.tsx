@@ -17,8 +17,15 @@ import {
     DialogContent,
     DialogContentText,
     DialogActions,
+    OutlinedInput,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+    SelectChangeEvent,
   } from "@mui/material";
   import Box from "@mui/material/Box";
+  //import { Pagination } from "@material-ui/lab";
   
   import Link from "next/link";
   import React, { useEffect, useState } from "react";
@@ -28,14 +35,39 @@ import {
   import { useTheme } from "@mui/material/styles";
   import useMediaQuery from "@mui/material/useMediaQuery";
   import Pagination from '@mui/material/Pagination';
+import usePagination from "./layouts/pagination";
   
   export default function Activitylist(){
     const [activites, setactivites] = useState([]);
-    const [page, setpage] = useState(1);
-
+    const [searchquery, setsearchquery] = useState("");
+    const [searchdata,setsearchdata] = useState([]);
     const [open, setOpen] = React.useState(false);
     const theme = useTheme();
     const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
+
+    const handleSearch=(e:any)=>{
+      setsearchquery(e.target.value);
+      if(e.target.value===""){
+        setactivites(searchdata);
+      }else{
+        const filterres = searchdata.filter((item:any)=>{
+          return item.name.toLowerCase().includes(e.target.value.toLowerCase());
+        });
+        const dtd = filterres;
+        setactivites(dtd);
+      }
+    }
+
+
+  let [page, setPage] = useState(1);
+  const PER_PAGE = 5;
+  const count = Math.ceil(activites.length / PER_PAGE);
+  const DATA = usePagination(activites, PER_PAGE);
+
+  const handleChange = (e:any, p:any) => {
+    setPage(p);
+    DATA.jump(p);
+  };
   
     const handleClickOpen = (id:any) => {
       setOpen(true);
@@ -45,9 +77,24 @@ import {
     const handleClose = () => {
       setOpen(false);
     };
+
+    const [status, setstatus] = React.useState('');
+
+    const handleSelectChange = (event: SelectChangeEvent) => {
+      setstatus(event.target.value as string);
+      if(event.target.value===""){
+        setactivites(searchdata);
+      }else{
+        const filterresult = searchdata.filter((item:any)=>{
+          return item.status.includes(event.target.value);
+        });
+        const dtdd = filterresult;
+        setactivites(dtdd);
+      }
+    };
   
     useEffect(() => {
-      const url = `https://api.publicapis.org/entries?_page=${page}`;
+      const url ="https://api-school.mangoitsol.com/api/getactivity";
       const fetchData = async () => {
         try {
           const response = await fetch(url, {
@@ -59,18 +106,42 @@ import {
           const json = await response.json();
           //console.log(json.data);
           setactivites(json.data);
+          setsearchdata(json.data);
         } catch (error) {
           console.log("error", error);
         }
       };
       fetchData();
-    }, [page]);
+    }, []);
     return (
       <>
         <Container component="main" style={{ backgroundColor: "white" }}>
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
           <Container>
             <Card>
+            <OutlinedInput
+                    onInput={(e) => handleSearch(e)}
+                    id="search"
+                    type="search"
+                    name="search"
+                    value={searchquery}
+                    placeholder="Search..."
+                    multiline
+                  />
+                   <FormControl fullWidth>
+        <InputLabel id="demo-simple-select-label">Select Status</InputLabel>
+        <Select
+          labelId="demo-simple-select-label"
+          id="demo-simple-select"
+          value={status}
+          label="Status"
+          onChange={handleSelectChange}
+        >
+          <MenuItem value="Active">Active</MenuItem>
+          <MenuItem value="Archive">Archive</MenuItem>
+          <MenuItem value="Draft">Draft</MenuItem>
+        </Select>
+      </FormControl>
               <TableContainer sx={{ minWidth: 800 }}>
                 <Table>
                   <TableHead>
@@ -88,8 +159,8 @@ import {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {activites &&
-                      activites.map((item, key) => {
+                    {DATA.currentData() &&
+                      DATA.currentData().map((item:any, key:any) => {
                         const {
                           id,
                           name,
@@ -156,9 +227,16 @@ import {
                   </TableBody>
                 </Table>
               </TableContainer>
+      <Pagination
+        count={count}
+        size="large"
+        page={page}
+        variant="outlined"
+        shape="rounded"
+        onChange={handleChange}
+      />
             </Card>
           </Container>
-          <Pagination count={10} color="primary" defaultPage={page} onChange={(event,value)=>setpage(value)} />
           <div>
             <Dialog
               fullScreen={fullScreen}
