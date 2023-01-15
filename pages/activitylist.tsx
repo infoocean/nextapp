@@ -128,20 +128,6 @@ import usePagination from "./layouts/pagination";
                     placeholder="Search..."
                     multiline
                   />
-                   <FormControl fullWidth>
-        <InputLabel id="demo-simple-select-label">Select Status</InputLabel>
-        <Select
-          labelId="demo-simple-select-label"
-          id="demo-simple-select"
-          value={status}
-          label="Status"
-          onChange={handleSelectChange}
-        >
-          <MenuItem value="Active">Active</MenuItem>
-          <MenuItem value="Archive">Archive</MenuItem>
-          <MenuItem value="Draft">Draft</MenuItem>
-        </Select>
-      </FormControl>
               <TableContainer sx={{ minWidth: 800 }}>
                 <Table>
                   <TableHead>
