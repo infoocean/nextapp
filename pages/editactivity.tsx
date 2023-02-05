@@ -2,14 +2,12 @@ import {
     Button,
     Container,
     FormControl,
-    getCardHeaderUtilityClass,
     Grid,
     InputLabel,
     MenuItem,
     OutlinedInput,
     Select,
     Stack,
-    TextareaAutosize,
   } from "@mui/material";  
   import React, { useEffect, useState } from "react";
   import { useForm, SubmitHandler } from "react-hook-form";
@@ -20,27 +18,23 @@ import {
     fontWeight: "bold",
   };
 
-  enum TypeEnum {
-    Active = "Active",
-    Archive = "Archive",
-    Draft = "Darft"
-  }
-
 type FormValues = {
     name: string;
-    price: number;
-    startdate:string;
-    enddate:string;
-    shortdescription:string;
-    description:string;
-    image:string;
-    status:TypeEnum;
+    status:number;
+    password:string;
+    customertype:string
   };
 
   export default function Editactivity(){
+    const [custtype, setcusttype] = React.useState<any>([]);
+    let ct=1;
+    const [dt,setdt] =  React.useState<any>(4);
+    const {register, handleSubmit, setValue, formState: { errors } } = useForm<FormValues>();
+    const onSubmit: SubmitHandler<FormValues> = data => {
+      console.log(data);
+    }
 
-    const [activites, setactivites] = useState<any>([]);
-    const url = `https://api-school.mangoitsol.com/api/getactivitydetails/19`;
+    const url = `https://api-school.mangoitsol.com/api/getuserdetails/91`;
     const fetchData = async () => {
       try {
         const response = await fetch(url, {
@@ -50,28 +44,38 @@ type FormValues = {
           },
         });
         const json = await response.json();
-        //console.log(json.data);
-        setactivites(json.data);
+        console.log(json.data[0]);
+        setValue("name",json.data[0].name)
+        //setValue("status",json.data[0].status)
+        ct = json.data[0].name;
+        //setValue("customertype",json.data[0].typeId)
+        setdt(json.data[0].typeId);
       } catch (error) {
         console.log("error", error);
       }
     }
     useEffect(() => {
       fetchData();
+      getType();
     }, [])
+  
+    //get type
+    const getType = async () => {
+      const url = `https://api-school.mangoitsol.com/api/getType`;
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InNqMjU4NTA5N0BnbWFpbC5jb20iLCJwYXNzd29yZCI6IlNodWJoYW0jMTIiLCJpYXQiOjE2Njk2MDk1MTR9.I06yy-Y3vlE784xUUg7__YH9Y1w_svjkGPKQC6SKSD4",
+          },
+        });
+        const res = await response.json();
+        setcusttype(res.data);
+      } catch (error) {
+        console.log("error", error);
+      }
+    };
     
-    console.log(activites);
-    const {register, handleSubmit, formState: { errors } } = useForm<FormValues>({ defaultValues: {
-      name: activites.name,
-      price:23,
-      startdate:"2022-12-10",
-      enddate:"2022-12-20",
-      shortdescription:"kjdfhdkjzfhakshfk",
-      description:"djkfksgvksdhfkshdkjfhskjfhsdjfhdsufghsduigfsyefidsyiofsydfhdsi",
-    }});
-    const onSubmit: SubmitHandler<FormValues> = data => {
-      console.log(data);
-    }
     return (
       <>
         <Container component="main" style={{ backgroundColor: "white" }}>
@@ -90,50 +94,17 @@ type FormValues = {
                     fullWidth
                     {...register("name", {
                         required: true,
+                        validate: (value) => { return !!value.trim()}
                       })}
                      
                   />
                 </Stack>
                 <span style={style}>
-                  {errors.name && <span>Name Feild is Required **</span>}
+                  {errors.name?.type==="required" && <span>Feild is Required **</span>}
                 </span>
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Stack spacing={1}>
-                  <InputLabel htmlFor="price">
-                    Activity Price <span className="err_str">*</span>
-                  </InputLabel>
-                  <OutlinedInput
-                    fullWidth
-                    id="price"
-                    type="price"
-                    size="small"
-                    placeholder="Price..."
-                    {...register("price", {
-                        required: true,
-                      })}
-                  />
-                </Stack>
                 <span style={style}>
-                  {errors.price && <span>Price Feild is Required **</span>}
+                  {errors.name?.type==="validate" && <span>White Space not allowed **</span>}
                 </span>
-              </Grid>
-             <Grid item xs={12} md={6}>
-                <Stack spacing={1}>
-                  <InputLabel htmlFor="type">
-                    Type <span className="err_str">*</span>
-                  </InputLabel>
-                  <FormControl>
-                    <Select 
-                      size="small"
-                      placeholder="Enter Car Brand"
-                      
-                    >
-                      <MenuItem value="Free">Free</MenuItem>
-                      <MenuItem value="Paid">Paid</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Stack>
               </Grid>
               <Grid item xs={12} md={6}>
                 <Stack spacing={1}>
@@ -146,103 +117,71 @@ type FormValues = {
                       displayEmpty
                       inputProps={{ "aria-label": "Without label" }}
                       {...register("status",{
-                        required: true,
+                        required: true
                       })}
+                      defaultValue={ct}
                     >
-                      <MenuItem value="Active">Active</MenuItem>
-                      <MenuItem value="Archive">Archive</MenuItem>
-                      <MenuItem value="Draft">Draft</MenuItem>
+                      <MenuItem value={1}>Active</MenuItem>
+                      <MenuItem value={0}>InActive</MenuItem>
+                     
                     </Select>
                     <span style={style}>
                   {errors.status && <span>status  Feild is Required **</span>}
                 </span>
                   </FormControl>
                 </Stack>
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Stack spacing={1}>
-                  <InputLabel htmlFor="startdate">
-                    Start Date <span className="err_str">*</span>
-                  </InputLabel>
-                  <OutlinedInput
-                    fullWidth
-                    size="small"
-                    type="date"
-                    id="startdate"
-                    {...register("startdate", {
-                        required: true,
-                      })}
-                  />
-                   <span style={style}>
-                  {errors.startdate && <span>Start Date Feild is Required **</span>}
-                </span>
-                </Stack>
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Stack spacing={1}>
-                  <InputLabel htmlFor="enddate">
-                    End Date <span className="err_str">*</span>
-                  </InputLabel>
-                  <OutlinedInput
-                    fullWidth
-                    size="small"
-                    type="date"
-                    id="enddate"
-                    {...register("enddate", {
-                        required: true,
-                      })}
-                  />
-                </Stack>
-                <span style={style}>
-                  {errors.enddate && <span>End Date Feild is Required **</span>}
-                </span>
-              </Grid>
-              <Grid item xs={12}>
-                <Stack spacing={1}>
-                  <InputLabel htmlFor="image">
-                    Upload Image <span className="err_str">*</span>
-                  </InputLabel>
-                  <OutlinedInput
-                    type="file"
-                    size="small"
-                    fullWidth
-                    id="image"
-                    placeholder="image."
-                    {...register("image", {
-                        required: true,
-                      })}
-                  />
-                </Stack>
-                <span style={style}>
-                  {errors.image && <span>Image Feild is Required **</span>}
-                </span>
-              </Grid>
-              <Grid item xs={12}>
-                <Stack spacing={1}>
-                  <InputLabel htmlFor="shortdescription">
-                    Short Description <span className="err_str">*</span>
-                  </InputLabel>
-                  <TextareaAutosize minRows={3} {...register("shortdescription", {
-                        required: true,
-                      })} />
-                </Stack>
-                <span style={style}>
-                  {errors.shortdescription && <span>Short Description Feild is Required **</span>}
-                </span>
-              </Grid>
-              <Grid item xs={12}>
-                <Stack spacing={1}>
-                  <InputLabel htmlFor="description">
-                    Description <span className="err_str">*</span>
-                  </InputLabel>
-                  <TextareaAutosize minRows={5} {...register("description", {
-                        required: true,
-                      })} />
-                </Stack>
-                <span style={style}>
-                  {errors.description && <span>Description Feild is Required **</span>}
-                </span>
               </Grid> 
+              <Grid item xs={12} md={12}>
+                      <Stack spacing={1}>
+                        <InputLabel htmlFor="name">Customer Type</InputLabel>
+                        <FormControl fullWidth>
+                          <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            size="small"
+                            defaultValue={dt}
+                            {...register("customertype")}
+                          >
+                            <MenuItem value={0}>Individual</MenuItem>
+                            {custtype &&
+                              custtype.map((data: any, key: any) => {
+                                return (
+                                  <MenuItem key={key} value={data.id}>
+                                    {data.name}
+                                  </MenuItem>
+                                );
+                              })}
+                          </Select>
+                        </FormControl>
+                      </Stack>
+                    </Grid>
+              <Grid item xs={12} md={12}>
+                <Stack spacing={1}>
+                  <InputLabel htmlFor="name">
+                    Password <span className="err_str">*</span>
+                  </InputLabel>
+                  <OutlinedInput
+                    type="password"
+                    id="password"
+                    size="small"
+                    fullWidth
+                    {...register("password", {
+                        required: true,
+                        validate: (value) => { return !!value.trim()},
+                        pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/
+                      })}
+                  />
+                </Stack>
+                <span style={style}>
+                  {errors.password?.type==="required" && <span>password is Required **</span>}
+                </span>
+                <span style={style}>
+                  {errors.password?.type==="validate" && <span>White Space not allowed **</span>}
+                </span>
+                <span style={style}>
+                  {errors.password?.type==="pattern" && <span>password should have at least 8 character and contain one uppercase, one lowercase, one number and one special characte **</span>}
+                </span>
+              </Grid>
               <Grid item xs={12}>
                 <Button
                   fullWidth
