@@ -7,18 +7,15 @@ import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
-import Link from 'next/link';
 import react, { useEffect, useState } from 'react'
 
 export default function MyApp() {
-    const [activites, setactivites] = useState([]);
-
+    const [activites, setactivites] = useState<any>([]);
     useEffect(() => {
         fetchData();
     }, [])
-    
   //get ACTIVITY data
-  const url = `https://api-school.mangoitsol.com/api/getactivity`;
+  const url = `https://api-school.mangoitsol.com/api/getType`;
   const fetchData = async () => {
     try {
       const response = await fetch(url, {
@@ -27,7 +24,6 @@ export default function MyApp() {
         },
       });
       const json = await response.json();
-      console.log(json.data);
       setactivites(json.data);
     } catch (error) {
       console.log("error", error);
@@ -36,29 +32,47 @@ export default function MyApp() {
 
   const handleChange=(e:any)=>{ 
     const { name, checked}= e.target;
-  if(name==="allselect")
+      if(name==="allselect")
+      {
+      const checkedvalue = activites.map( (user:any)=>{ return {...user, isChecked:checked}});
+      console.log(checkedvalue);
+      setactivites(checkedvalue);
+      } else{
+        const checkedvalue= activites.map( (user:any)=>
+        user.username ===name? {...user, isChecked:checked}:user);
+        console.log(checkedvalue);
+        setactivites(checkedvalue);
+      }    
+}
+
+const handlealldelete = async()=>{
+  const checkedinputvalue=[];
+  if(checkedinputvalue.length>0){
+    for(let i=0; i<activites.length; i++)
+{
+  if(activites[i].isChecked===true)
   {
-  const checkedvalue = activites.map( (user:any)=>{ return {...user, isChecked:checked}});
-  console.log(checkedvalue);
-  setactivites(checkedvalue);
-  } else{
-   const checkedvalue= activites.map( (user:any)=>
-   user.username ===name? {...user, isChecked:checked}:user);
-   console.log(checkedvalue);
-   setactivites(checkedvalue);
+      checkedinputvalue.push(parseInt(activites[i].id));
+  }
+
+  console.log(checkedinputvalue);
+}
+  }  else
+  {
+   alert("Please select at least one checkbix");
   }
 
 }
-
-
   return (
     <>
+      
+      <button className="btn btn-danger mb-3" onClick={ ()=>{ handlealldelete()}}>All Delete </button>
       <Table style={{ marginTop: "20px" }}>
                   <TableHead>
                     <TableRow>
                       <TableCell padding="checkbox">
                         <Checkbox
-                        name="allselect" checked= { !activites.some((user:any)=>user?.isChecked!==true)} onChange={ handleChange} 
+                           name="allselect" checked= { !activites.some((user:any)=>user?.isChecked!==true)} onChange={ handleChange} 
                         />
                       </TableCell>
                       <TableCell>
@@ -66,24 +80,6 @@ export default function MyApp() {
                       </TableCell>
                       <TableCell>
                         <Typography>NAME</Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography>TYPE</Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography>START DATE</Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography width={100}>END DATE</Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography>STATUS</Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography width={150}>AMOUNT(if paid)</Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography>ACTION</Typography>
                       </TableCell>
                     </TableRow>
                   </TableHead>
@@ -93,13 +89,6 @@ export default function MyApp() {
                         const {
                           id,
                           name,
-                          price,
-                          type,
-                          startdate,
-                          status,
-                          enddate,
-                          description,
-                          image,
                         } = item;
                         return (
                           <TableRow
@@ -109,17 +98,12 @@ export default function MyApp() {
                             role="checkbox"
                           >
                             <TableCell padding="checkbox">
-                              <Checkbox  checked={item?.isChecked|| false } onChange={ handleChange } />
+                              <Checkbox  checked={item?.isChecked || false } onChange={ handleChange } />
                             </TableCell>
                             <TableCell align="left">
-                              1
+                              {id}
                             </TableCell >
                             <TableCell align="left">{name}</TableCell>
-                            <TableCell align="left">{type}</TableCell>
-                            <TableCell align="left">{startdate}</TableCell>
-                            <TableCell align="left">{enddate}</TableCell>
-                            <TableCell align="left">{status}</TableCell>
-                            <TableCell align="left">{price}</TableCell>
                             <TableCell align="left">
                             </TableCell>
                           </TableRow>
